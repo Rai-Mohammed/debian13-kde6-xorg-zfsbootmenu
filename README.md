@@ -16,6 +16,7 @@ Bash script to install Debian 13, KDE Plasma 6, xserver-xorg with ZFS on Root an
 ## Usage
 
 1. **Configure Debian Networking**
+   
    Boot into your live environment, open a terminal, run the following
 
    ```bash
