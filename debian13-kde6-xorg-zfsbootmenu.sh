@@ -36,7 +36,7 @@ IF_PHY_GATEWAY="10.0.2.2"
 # From : https://docs.zfsbootmenu.org/en/latest/guides/debian/uefi.html#
 
 # Install helpers
-apt install -y ca-certificates apt-transport-https
+apt install -y ca-certificates apt-transport-https $CPU_ARCH-microcode
 
 # Install additional base packages
 apt install -y locales locales-all keyboard-configuration console-setup
@@ -195,8 +195,7 @@ dpkg-reconfigure locales tzdata keyboard-configuration console-setup
 
 # ZFS Configuration - Install required packages
 
-apt install -y gdisk dkms linux-headers-amd64 linux-image-amd64 zfs-initramfs dosfstools
-apt install -y zfsutils-linux
+apt install -y gdisk linux-headers-amd64 linux-image-amd64 zfs-initramfs dosfstools
 echo "REMAKE_INITRD=yes" > /etc/dkms/zfs.conf
 
 # Enable systemd ZFS services
