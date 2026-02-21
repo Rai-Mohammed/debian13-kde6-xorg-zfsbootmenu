@@ -53,8 +53,9 @@ Bash script to install Debian 13, KDE Plasma 6, xserver-xorg with ZFS on Root an
    EOF_APT
    ```
 
-2. **Run the Script**
-   Downloading the script and editing it, run the following to start the script
+2. **Downloading the script and editing it**
+   
+   Run the following to start the script
 
    ```bash
    apt update
