@@ -204,7 +204,7 @@ systemctl enable zfs.target
 systemctl enable zfs-import-cache
 systemctl enable zfs-mount
 systemctl enable zfs-import.target
-systemctl enable zfs-import-scan
+# systemctl enable zfs-import-scan
 
 # Configure initramfs-tools
 # Unencrypted No required steps
