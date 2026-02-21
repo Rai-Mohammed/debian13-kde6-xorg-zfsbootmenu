@@ -21,14 +21,14 @@ Bash script to install Debian 13, KDE Plasma 6, xserver-xorg with ZFS on Root an
 
    ```bash
    # Switch to a root shell
-   sudo -i
-   bash
+   root@debian:~# sudo -i
+   root@debian:~# bash
 
    # Check available network interfaces
-   ip addr show
+   root@debian:~# ip addr show
 
    # edit the network interfaces file to insure internet connectivity
-   root@debian:~$ nano /etc/network/interfaces
+   root@debian:~# nano /etc/network/interfaces
    auto lo
    iface lo inet loopback
 
@@ -42,15 +42,16 @@ Bash script to install Debian 13, KDE Plasma 6, xserver-xorg with ZFS on Root an
    ifup enp0s3
 
    #----------------------------------
-   root@debian:~$ systemctl restart networking.service
+   root@debian:~# systemctl restart networking.service
    # Do not test the connectivity by a ping, it doesn't work,
    # but you can update the system by "apt update && apt upgrade"
 
    # Configure and update APT
-   cat <<EOF_APT > /etc/apt/sources.list
+   root@debian:~# nano /etc/apt/sources.list
    deb http://deb.debian.org/debian/ trixie main non-free non-free-firmware contrib
    deb-src http://deb.debian.org/debian/ trixie main non-free non-free-firmware contrib
-   EOF_APT
+
+   root@debian:~# apt update && apt upgrade
    ```
 
 2. **Downloading the script and editing it**
@@ -58,14 +59,14 @@ Bash script to install Debian 13, KDE Plasma 6, xserver-xorg with ZFS on Root an
    Run the following to start the script
 
    ```bash
-   apt update
-   apt upgrade
-   apt install curl
-   curl -O https://raw.githubusercontent.com/Rai-Mohammed/debian13-kde6-xorg-zfsbootmenu/main/debian13-kde6-xorg-zfsbootmenu.sh
+   root@debian:~# apt update
+   root@debian:~# apt upgrade
+   root@debian:~# apt install curl
+   root@debian:~# curl -O https://raw.githubusercontent.com/Rai-Mohammed/debian13-kde6-xorg-zfsbootmenu/main/debian13-kde6-xorg-zfsbootmenu.sh
 
    # Make the necessary changes to the installation script
-   nano debian13-kde6-xorg-zfsbootmenu.sh
+   root@debian:~# nano debian13-kde6-xorg-zfsbootmenu.sh
 
-   chmod +x debian13-kde6-xorg-zfsbootmenu.sh
-   ./debian13-kde6-xorg-zfsbootmenu.sh
+   root@debian:~# chmod +x debian13-kde6-xorg-zfsbootmenu.sh
+   root@debian:~# ./debian13-kde6-xorg-zfsbootmenu.sh
    ```
