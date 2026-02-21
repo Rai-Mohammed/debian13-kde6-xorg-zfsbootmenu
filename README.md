@@ -8,7 +8,7 @@ Bash script to install Debian 13, KDE Plasma 6, xserver-xorg with ZFS on Root an
       ```bash
       The first task is to download the latest debian-live-13.X.X-amd64-standard.iso,
       this necessary to don''t have a miss matches packages between the live iso image and the
-      "apt update && apt upgrade" instruction, causing the system to not to be able loading the ZFS modules
+      "apt update && apt upgrade" instruction, causing the system to not be able loading the ZFS modules
       ```
 - A disk available for partitioning and installation (existing data will be erased)
 - Network connection for downloading packages and files
