@@ -139,7 +139,7 @@ echo "root:$ROOT_PASSWORD" | chpasswd
 # Create user and set password
 echo "Creating user and setting permissions..."
 useradd $USERNAME --shell /bin/bash --home /home/$USERNAME 
-usermod -aG sudo,audio,cdrom,dip,floppy,plugdev,video $USERNAME
+usermod -aG sudo,audio,cdrom,dip,floppy,plugdev,operator,video $USERNAME
 echo "$USERNAME:$USER_PASSWORD" | chpasswd
 
 # Check if the directory exists and confirm the user''s settings.
