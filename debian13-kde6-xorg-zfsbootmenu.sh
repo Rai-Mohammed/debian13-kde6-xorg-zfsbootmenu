@@ -29,7 +29,7 @@ ROOT_PASSWORD="fill_your_root_password"
 HOSTNAME="fill_your_hostname"
 
 IF_PHY="enp0s3"
-IF_PHY_ADDRESS="10.0.2.288"
+IF_PHY_ADDRESS="10.0.2.228"
 IF_PHY_NETMASK="255.255.255.0"
 IF_PHY_GATEWAY="10.0.2.2"
 #----------------------------------
@@ -204,6 +204,7 @@ systemctl enable zfs.target
 systemctl enable zfs-import-cache
 systemctl enable zfs-mount
 systemctl enable zfs-import.target
+systemctl enable zfs-import-scan
 
 # Configure initramfs-tools
 # Unencrypted No required steps
