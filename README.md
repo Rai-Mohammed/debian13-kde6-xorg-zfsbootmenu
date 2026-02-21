@@ -49,7 +49,7 @@ Bash script to install Debian 13, KDE Plasma 6, xserver-xorg with ZFS on Root an
    cat <<EOF_APT > /etc/apt/sources.list
    deb http://deb.debian.org/debian/ trixie main non-free non-free-firmware contrib
    deb-src http://deb.debian.org/debian/ trixie main non-free non-free-firmware contrib
-EOF_APT
+   EOF_APT
    ```
 
 2. **Run the Script**
