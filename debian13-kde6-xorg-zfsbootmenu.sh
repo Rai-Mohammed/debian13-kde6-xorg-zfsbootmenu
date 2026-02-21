@@ -310,8 +310,7 @@ EOF_CHROOT
 umount -n -R $MOUNT_POINT
 
 # Export the zpool and reboot
-
 zpool export $ZPOOL_NAME
 
-
-reboot
+# reboot
+echo "ZFS Boot Menu installation complete. You may reboot your system now."
