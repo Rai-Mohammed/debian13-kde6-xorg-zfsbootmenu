@@ -20,7 +20,7 @@ ZPOOL_NAME="zroot"
 
 KERNEL_VERSION=$(uname -r)  # Automatically get current kernel version
 MOUNT_POINT="/mnt"
-OS_ID=$(source /etc/os-release && echo "$OS_ID")  # Get OS ID from /etc/os-release
+OS_ID=$(source /etc/os-release && echo "$ID")  # Get OS ID from /etc/os-release
 OS_DISTRIBUTION="trixie"
 CPU_ARCH="intel"
 USERNAME="fill_your_user_name"
