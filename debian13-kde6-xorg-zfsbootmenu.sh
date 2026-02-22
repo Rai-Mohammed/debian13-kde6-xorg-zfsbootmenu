@@ -228,11 +228,7 @@ zfs set org.zfsbootmenu:commandline="quiet" $ZPOOL_NAME/ROOT
 mkfs.vfat -F32 "$BOOT_DEVICE"
 
 # Create an fstab entry and mount
-
-    cat << EOF_FSTAB >> /etc/fstab
-    $( blkid | grep "$BOOT_DEVICE" | cut -d ' ' -f 2 ) /boot/efi vfat defaults 0 0
-EOF_FSTAB
-
+echo "\$(blkid | grep "$BOOT_DEVICE" | cut -d ' ' -f 2) /boot/efi vfat defaults 0 0" >> /etc/fstab
 cat /etc/fstab
 
 mkdir -p /boot/efi
