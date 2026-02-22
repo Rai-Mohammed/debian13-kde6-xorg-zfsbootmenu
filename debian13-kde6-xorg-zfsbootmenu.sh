@@ -199,7 +199,7 @@ dpkg-reconfigure locales tzdata keyboard-configuration console-setup
 
 # ZFS Configuration - Install required packages
 
-apt install -y gdisk linux-headers-amd64 linux-image-amd64 zfs-initramfs dosfstools
+apt install -y gdisk dkms linux-headers-amd64 linux-image-amd64 zfsutils-linux zfs-initramfs dosfstools
 echo "REMAKE_INITRD=yes" > /etc/dkms/zfs.conf
 
 # Enable systemd ZFS services
