@@ -199,7 +199,7 @@ dpkg-reconfigure locales tzdata keyboard-configuration console-setup
 
 # ZFS Configuration - Install required packages
 
-apt install -y gdisk dkms linux-headers-amd64 linux-image-amd64 zfsutils-linux zfs-initramfs dosfstools
+apt install -y gdisk dkms linux-headers-amd64 linux-image-amd64 zfsutils-linux zfs-initramfs dosfstools efibootmgr curl
 echo "REMAKE_INITRD=yes" > /etc/dkms/zfs.conf
 
 # Enable systemd ZFS services
@@ -235,7 +235,6 @@ mkdir -p /boot/efi
 mount /boot/efi
 
 # Install ZFSBootMenu
-apt install curl
 
 # Fetch a prebuilt ZFSBootMenu EFI executable, saving it to the EFI system partition:
 
@@ -246,8 +245,6 @@ cp /boot/efi/EFI/ZBM/VMLINUZ.EFI /boot/efi/EFI/ZBM/VMLINUZ-BACKUP.EFI
 # Configure EFI boot entries
 
 mount -t efivarfs efivarfs /sys/firmware/efi/efivars
-
-apt install efibootmgr
 
 efibootmgr -c -d "$BOOT_DISK" -p "$BOOT_PART" \
   -L "ZFSBootMenu (Backup)" \
