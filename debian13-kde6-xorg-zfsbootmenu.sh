@@ -125,7 +125,7 @@ mount -t sysfs sys $MOUNT_POINT/sys
 mount -B /dev $MOUNT_POINT/dev
 mount -t devpts pts $MOUNT_POINT/dev/pts
 
-chroot $MOUNT_POINT /bin/bash <<-EOF_CHROOT
+chroot $MOUNT_POINT /bin/bash <<EOF_CHROOT
 # Basic Debian Configuration
 # Set a hostname
 
@@ -168,7 +168,7 @@ cat /etc/passwd | grep $USERNAME
 
 # Configure apt sources
 
-    cat  > /etc/apt/sources.list <<-EOF_APT
+    cat  > /etc/apt/sources.list <<EOF_APT
     deb http://deb.debian.org/debian/ $OS_DISTRIBUTION main non-free non-free-firmware contrib
     deb-src http://deb.debian.org/debian/ $OS_DISTRIBUTION main non-free non-free-firmware contrib
 
@@ -299,13 +299,13 @@ echo "Starting and enabling SSH server..."
 ip addr show
 
 touch /etc/network/interfaces.d/iface_lo.conf
-    cat > /etc/network/interfaces.d/iface_lo.conf <<-EOF_IF_LO
+    cat > /etc/network/interfaces.d/iface_lo.conf <<EOF_IF_LO
     auto lo
     iface lo inet loopback
 EOF_IF_LO
 
 touch /etc/network/interfaces.d/iface_$IF_PHY.conf
-    cat > /etc/network/interfaces.d/iface_$IF_PHY.conf <<-EOF_IF_PHY
+    cat > /etc/network/interfaces.d/iface_$IF_PHY.conf <<EOF_IF_PHY
     # VirtualBox Nat Adapter - For internet connectivity
     allow-hotplug $IF_PHY
     auto $IF_PHY
