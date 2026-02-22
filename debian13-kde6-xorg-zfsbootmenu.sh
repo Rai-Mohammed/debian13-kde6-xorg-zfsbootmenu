@@ -132,6 +132,8 @@ chroot $MOUNT_POINT /bin/bash <<-EOF_CHROOT
 echo "$HOSTNAME" > /etc/hostname
 echo -e "127.0.1.1\t $HOSTNAME" >> /etc/hosts
 
+cat /etc/hosts
+
 # Set a root password
 echo "Setting root password..."
 echo "root:$ROOT_PASSWORD" | chpasswd
@@ -179,6 +181,8 @@ cat /etc/passwd | grep $USERNAME
 
     # pre-release repository : deb http://deb.debian.org/debian $OS_DISTRIBUTION-backports main contrib non-free non-free-firmware contrib
 EOF_APT
+
+cat /etc/apt/sources.list
 
 # Update the repository cache
 apt update
@@ -228,6 +232,8 @@ mkfs.vfat -F32 "$BOOT_DEVICE"
     cat << EOF_FSTAB >> /etc/fstab
     $( blkid | grep "$BOOT_DEVICE" | cut -d ' ' -f 2 ) /boot/efi vfat defaults 0 0
 EOF_FSTAB
+
+cat /etc/fstab
 
 mkdir -p /boot/efi
 mount /boot/efi
@@ -310,6 +316,8 @@ touch /etc/network/interfaces.d/iface_$IF_PHY.conf
 
     ifup $IF_PHY
 EOF_IF_PHY
+
+cat /etc/network/interfaces.d/*
 
 # Prepare for first boot
 # Exit the chroot, unmount everything
