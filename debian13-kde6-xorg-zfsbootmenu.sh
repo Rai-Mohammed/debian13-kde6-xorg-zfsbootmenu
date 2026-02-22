@@ -322,12 +322,12 @@ cat /etc/network/interfaces.d/*
 # Prepare for first boot
 # Exit the chroot, unmount everything
 
-# exit
+exit
 EOF_CHROOT
-# umount -n -R $MOUNT_POINT
+umount -n -R $MOUNT_POINT
 
 # Export the zpool and reboot
-# zpool export $ZPOOL_NAME
+zpool export $ZPOOL_NAME
 
 # reboot
 echo "ZFS Boot Menu installation complete. You may reboot your system now."
