@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Bash script to install Debian 13, KDE Plasma 6, xserver-xorg with ZFS on Root and ZFSBootMenu
+# Bash script to install Ubuntu 25.10, Gnome DE, Wayland with ZFS on Root and ZFSBootMenu
 
 # Automatically set other variables
 
