@@ -32,6 +32,11 @@ IF_PHY="enp0s3"
 IF_PHY_ADDRESS="10.0.2.228"
 IF_PHY_NETMASK="255.255.255.0"
 IF_PHY_GATEWAY="10.0.2.2"
+
+IF_PHY_HOA="enp0s8"
+IF_PHY_ADDRESS_HOA="192.168.59.228"
+IF_PHY_NETMASK_HOA="255.255.255.0"
+IF_PHY_NETWORK_HOA="192.168.59"
 #----------------------------------
 # From : https://docs.zfsbootmenu.org/en/latest/guides/debian/uefi.html#
 
@@ -309,6 +314,19 @@ touch /etc/network/interfaces.d/iface_$IF_PHY.conf
 
     ifup $IF_PHY
 EOF_IF_PHY
+
+touch /etc/network/interfaces.d/iface_$IF_PHY_HOA.conf
+    cat > /etc/network/interfaces.d/iface_$IF_PHY_HOA.conf <<EOF_IF_PHY_HOA
+    # VirtualBox Host Only Adapter - For Lan connectivity
+    allow-hotplug $IF_PHY_HOA
+    auto $IF_PHY_HOA
+    iface $IF_PHY_HOA inet static
+        address $IF_PHY_ADDRESS_HOA
+        netmask $IF_PHY_NETMASK_HOA
+        gateway $IF_PHY_NETWORK_HOA
+
+    ifup $IF_PHY_HOA
+EOF_IF_PHY_HOA
 
 cat /etc/network/interfaces.d/*
 
