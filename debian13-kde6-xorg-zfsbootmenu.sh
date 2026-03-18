@@ -264,18 +264,22 @@ echo "Installing system utilities..."
 apt install -y systemd-timesyncd net-tools iproute2 isc-dhcp-client iputils-ping traceroute curl wget dnsutils
 apt install -y ethtool ifupdown tcpdump nmap nano htop openssh-server git tmux
 
+apt install -y  tasksel
+# add full Debian KDE Desktop setup (tasksel)
+	echo "tasksel installer : add a full Debian KDE Desktop setup"
+	tasksel install task-kde-desktop
 # Installing KDE Plasma 6 Desktop environment with xserver-xorg
-echo "Installing KDE Plasma 6 Desktop environment with xserver-xorg..."
-apt install -y sddm dbus xorg xserver-xorg plasma-desktop kde-config-sddm plasma-workspace task-kde-desktop
-apt install -y dbus-user-session dbus-x11 kwin-x11 qt6-virtualkeyboard-plugin
+# echo "Installing KDE Plasma 6 Desktop environment with xserver-xorg..."
+# apt install -y sddm dbus xorg xserver-xorg plasma-desktop kde-config-sddm plasma-workspace task-kde-desktop
+# apt install -y dbus-user-session dbus-x11 kwin-x11 qt6-virtualkeyboard-plugin
 
  systemctl start sddm
  systemctl enable sddm
  systemctl status sddm
 
- systemctl start dbus
- systemctl enable dbus
- systemctl status dbus
+# systemctl start dbus
+# systemctl enable dbus
+# systemctl status dbus
 
 # Installing IDE Pycharm-Community | PyCharm Installation Instructions : From https://wiki.debian.org/JetBrains
 echo "Installing IDE Pycharm-Community..."
