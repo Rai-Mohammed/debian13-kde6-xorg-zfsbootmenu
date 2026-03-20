@@ -3,51 +3,56 @@
 # Bash script to install Debian 13, KDE Plasma 6, xserver-xorg with ZFS on Root and ZFSBootMenu
 
 # Automatically set other variables
+PHY_DRIVE="/dev/sda"
 
 # First, define variables that refer to the disk and partition number that will hold boot files:
 # Single SATA disk :
-BOOT_DISK="/dev/sda"
+BOOT_DISK=$PHY_DRIVE
 BOOT_PART="1"
 BOOT_DEVICE="${BOOT_DISK}${BOOT_PART}"
 
+# Second, define variables that refer to the disk and partition number that will hold swap files:
+# Single SATA disk :
+SWAP_DISK=$PHY_DRIVE
+SWAP_PART="2"
+SWAP_DEVICE="${SWAP_DISK}${SWAP_PART}"
+
 # Next, define variables that refer to the disk and partition number that will hold the ZFS pool:
 # Single SATA disk :
-POOL_DISK="/dev/sda"
-POOL_PART="2"
+POOL_DISK=$PHY_DRIVE
+POOL_PART="3"
 POOL_DEVICE="${POOL_DISK}${POOL_PART}"
 
 ZPOOL_NAME="zroot"
+ZBM_EFI_PATH="https://get.zfsbootmenu.org/efi"
 
 KERNEL_VERSION=$(uname -r)  # Automatically get current kernel version
 MOUNT_POINT="/mnt"
 OS_ID=$(source /etc/os-release && echo "$ID")  # Get OS ID from /etc/os-release
 OS_DISTRIBUTION="trixie"
+APT_MIRROR="http://archive.debian.com/debian/"
 CPU_ARCH="intel"
 USERNAME="fill_your_username"
 USER_PASSWORD="fill_your_user_password"
 ROOT_PASSWORD="fill_your_root_password"
 HOSTNAME="fill_your_hostname"
 
-IF_PHY="enp0s3"
-IF_PHY_ADDRESS="10.0.2.228"
-IF_PHY_NETMASK="255.255.255.0"
-IF_PHY_GATEWAY="10.0.2.2"
+IF_PHY_DNS="1.1.1.1,8.8.8.8,9.9.9.9,8.8.4.4"
+
+IF_PHY_NET="enp0s3"
+IF_PHY_ADDRESS_NET="10.0.2.228"
+IF_PHY_NETMASK_NET="24"
+IF_PHY_GATEWAY_NET="10.0.2.2"
 
 IF_PHY_HOA="enp0s8"
 IF_PHY_ADDRESS_HOA="192.168.59.228"
-IF_PHY_NETMASK_HOA="255.255.255.0"
-IF_PHY_NETWORK_HOA="192.168.59"
+IF_PHY_NETMASK_HOA="24"
+IF_PHY_GATEWAY_HOA="192.168.59.1"
 #----------------------------------
-# From : https://docs.zfsbootmenu.org/en/latest/guides/debian/uefi.html#
+# From : https://docs.zfsbootmenu.org/en/latest/guides/ubuntu/uefi.html#
 
 # Install helpers
-apt install -y ca-certificates apt-transport-https $CPU_ARCH-microcode
-
-# Install additional base packages
-apt install -y locales locales-all keyboard-configuration console-setup
-
-apt install -y debootstrap gdisk dkms linux-headers-$KERNEL_VERSION         #linux-headers-amd64
-apt install -y zfsutils-linux
+apt install -y debootstrap parted gdisk shim-signed mokutil dkms zfs-dkms zfsutils-linux
 
 # Generate /etc/hostid
 zgenhostid -f
@@ -57,22 +62,28 @@ zgenhostid -f
 lsblk
 
 # Disk preparation
+parted "$PHY_DRIVE" mklabel gpt
+
 # Wipe partitions
 zpool destroy -f $ZPOOL_NAME
 zpool clear -F $ZPOOL_NAME
 zpool labelclear -f $POOL_DEVICE
 
-wipefs -a "$POOL_DISK"
-wipefs -a "$BOOT_DISK"
+wipefs -a "$PHY_DRIVE"
 
-sgdisk --zap-all "$POOL_DISK"
-sgdisk --zap-all "$BOOT_DISK"
+sgdisk --zap-all "$PHY_DRIVE"
 
 # Create EFI boot partition
-sgdisk -n "${BOOT_PART}:1m:+512m" -t "${BOOT_PART}:ef00" "$BOOT_DISK"
+sgdisk -n "${BOOT_PART}:1m:+512m" -t "${BOOT_PART}:ef00" -c "${BOOT_PART}:EFI System Partition" "$BOOT_DISK"
+
+# Create SWAP partition
+sgdisk -n "${SWAP_PART}:0:+12G" -t "${SWAP_PART}:8200" -c "${SWAP_PART}:Linux Ubuntu SWAP" "$SWAP_DISK"
 
 # Create zpool partition
-sgdisk -n "${POOL_PART}:0:-10m" -t "${POOL_PART}:bf00" "$POOL_DISK"
+sgdisk -n "${POOL_PART}:0:-10m" -t "${POOL_PART}:bf00" -c "${POOL_PART}:Ubuntu ZFS zroot Partition" "$POOL_DISK"
+
+# Verify your target disk devices with lsblk
+lsblk
 
 # ZFS verification
 zpool status
@@ -88,7 +99,7 @@ zpool create -f -o ashift=12 \
  -O acltype=posixacl \
  -O xattr=sa \
  -O relatime=on \
- -m none $ZPOOL_NAME $POOL_DEVICE
+ -m none "$ZPOOL_NAME" "$POOL_DEVICE"
 
 zpool status
 # Create initial file systems
@@ -99,6 +110,8 @@ zpool status
 
  zfs create -o mountpoint=/home $ZPOOL_NAME/home
 
+ zfs create -o mountpoint=/home/$USERNAME $ZPOOL_NAME/home/$USERNAME
+
  zpool set bootfs=$ZPOOL_NAME/ROOT/$OS_ID $ZPOOL_NAME
 
 # Export, then re-import with a temporary mountpoint of $MOUNT_POINT
@@ -107,7 +120,7 @@ zpool status
  zpool import -N -R $MOUNT_POINT $ZPOOL_NAME
  zfs mount $ZPOOL_NAME/ROOT/$OS_ID
  zfs mount $ZPOOL_NAME/home
-
+ zfs mount $ZPOOL_NAME/home/$USERNAME
 
 # Verify that everything is mounted correctly
 mount | grep mnt
@@ -131,7 +144,7 @@ mount -B /dev $MOUNT_POINT/dev
 mount -t devpts pts $MOUNT_POINT/dev/pts
 
 chroot $MOUNT_POINT /bin/bash <<EOF_CHROOT
-# Basic Debian Configuration
+# Basic Ubuntu Configuration
 # Set a hostname
 
 echo "$HOSTNAME" > /etc/hostname
@@ -146,7 +159,7 @@ echo "root:$ROOT_PASSWORD" | chpasswd
 # Create user and set password
 echo "Creating user and setting permissions..."
 useradd $USERNAME --shell /bin/bash --home /home/$USERNAME 
-usermod -aG sudo,audio,cdrom,dip,floppy,plugdev,operator,netdev,video $USERNAME
+usermod -aG sudo,audio,cdrom,dip,floppy,plugdev,operator,netdev,video,render $USERNAME
 echo "$USERNAME:$USER_PASSWORD" | chpasswd
 
 # Check if the directory exists and confirm the user''s settings.
@@ -158,45 +171,45 @@ cat /etc/passwd | grep $USERNAME
 
 # Set correct ownership and permissions.
 # The home directory must be owned by the user.
-#  chown $USERNAME:$USERNAME /home/$USERNAME
+chown -R $USERNAME:$USERNAME /home/$USERNAME
 
 # The user needs permission to enter the directory. The 755 permission is a good default, which allows the owner to read, write, and execute, and others to read and execute.
 #  chmod 755 /home/$USERNAME
 
 # Copy default shell files (if necessary).
 # If you created the directory manually, you may need to copy default shell configuration files.
-# cp -r /etc/skel/. /home/$USERNAME/
-# chown -R $USERNAME:$USERNAME /home/$USERNAME/
+cp -r /etc/skel/. /home/$USERNAME/
+chown -R $USERNAME:$USERNAME /home/$USERNAME/
 
 #For a more automated and robust solution, use mkhomedir_helper if available
 
 
-# Configure apt sources
+# Configure apt sources inside Chroot
 
-    cat  > /etc/apt/sources.list <<EOF_APT
-    deb http://deb.debian.org/debian/ $OS_DISTRIBUTION main non-free non-free-firmware contrib
-    deb-src http://deb.debian.org/debian/ $OS_DISTRIBUTION main non-free non-free-firmware contrib
+    cat  > /etc/apt/sources.list <<EOF_APT_CHROOTED
+    deb ${APT_MIRROR} $OS_DISTRIBUTION main non-free non-free-firmware contrib
+    deb-src ${APT_MIRROR} $OS_DISTRIBUTION main non-free non-free-firmware contrib
 
-    deb http://deb.debian.org/debian-security $OS_DISTRIBUTION-security main non-free non-free-firmware contrib
-    deb-src http://deb.debian.org/debian-security/ $OS_DISTRIBUTION-security main non-free non-free-firmware contrib
+    deb ${APT_MIRROR} $OS_DISTRIBUTION-security main non-free non-free-firmware contrib
+    deb-src ${APT_MIRROR} $OS_DISTRIBUTION-security main non-free non-free-firmware contrib
 
     # $OS_DISTRIBUTION-updates, to get updates before a point release is made
-    deb http://deb.debian.org/debian $OS_DISTRIBUTION-updates main non-free non-free-firmware contrib
-    deb-src http://deb.debian.org/debian $OS_DISTRIBUTION-updates main non-free non-free-firmware contrib
+    deb ${APT_MIRROR} $OS_DISTRIBUTION-updates main non-free non-free-firmware contrib
+    deb-src ${APT_MIRROR} $OS_DISTRIBUTION-updates main non-free non-free-firmware contrib
 
-    # pre-release repository : deb http://deb.debian.org/debian $OS_DISTRIBUTION-backports main contrib non-free non-free-firmware contrib
-EOF_APT
+    deb ${APT_MIRROR} $OS_DISTRIBUTION-backports main non-free non-free-firmware contrib
+
+    # pre-release repository : dedeb-srcb ${APT_MIRROR} $OS_DISTRIBUTION-backports main non-free non-free-firmware contrib
+EOF_APT_CHROOTED
 
 cat /etc/apt/sources.list
 
 # Update the repository cache
 apt update
+apt upgrade -y
 
 # Install helpers
-apt install -y ca-certificates apt-transport-https $CPU_ARCH-microcode
-
-# Install additional base packages
-apt install -y locales locales-all keyboard-configuration console-setup
+apt install -y --no-install-recommends linux-generic locales tzdata keyboard-configuration console-setup
 
 # Note : You should always enable the en_US.UTF-8 locale because some programs require it.
 echo "Configure packages to customize local and console properties..."
@@ -204,8 +217,10 @@ dpkg-reconfigure locales tzdata keyboard-configuration console-setup
 
 # ZFS Configuration - Install required packages
 
-apt install -y gdisk dkms linux-headers-amd64 linux-image-amd64 zfsutils-linux zfs-initramfs dosfstools efibootmgr curl
-echo "REMAKE_INITRD=yes" > /etc/dkms/zfs.conf
+apt install -y gdisk parted shim-signed mokutil dkms zfs-dkms zfsutils-linux zfs-initramfs
+
+apt install -y dosfstools efibootmgr curl mc openssh-server
+# Depricated  # echo "REMAKE_INITRD=yes" > /etc/dkms/zfs.conf
 
 # Enable systemd ZFS services
 
@@ -229,11 +244,22 @@ update-initramfs -c -k all
 zfs set org.zfsbootmenu:commandline="quiet" $ZPOOL_NAME/ROOT
 
 # Create a vfat filesystem
-
 mkfs.vfat -F32 "$BOOT_DEVICE"
 
-# Create an fstab entry and mount
+# Add and Activate a Swap Partition
+mkswap "$SWAP_DEVICE"
+swapon "$SWAP_DEVICE"
+
+# Find the UUID of the new swap partition: blkid
+blkid | grep swap
+
+# Create an fstab entry and mount for the BOOT_DEVICE
 echo "\$(blkid | grep "$BOOT_DEVICE" | cut -d ' ' -f 2) /boot/efi vfat defaults 0 0" >> /etc/fstab
+
+# Make Swap Permanent (/etc/fstab)
+# Add this line to the end: UUID=SWAP_DEVICE-uuid-here none swap sw 0 0
+echo "\$(blkid | grep "$SWAP_DEVICE" | cut -d ' ' -f 2) none swap sw 0 0" >> /etc/fstab
+
 cat /etc/fstab
 
 mkdir -p /boot/efi
@@ -244,7 +270,7 @@ mount /boot/efi
 # Fetch a prebuilt ZFSBootMenu EFI executable, saving it to the EFI system partition:
 
 mkdir -p /boot/efi/EFI/ZBM
-curl -o /boot/efi/EFI/ZBM/VMLINUZ.EFI -L https://get.zfsbootmenu.org/efi
+curl -o /boot/efi/EFI/ZBM/VMLINUZ.EFI -L "$ZBM_EFI_PATH"
 cp /boot/efi/EFI/ZBM/VMLINUZ.EFI /boot/efi/EFI/ZBM/VMLINUZ-BACKUP.EFI
 
 # Configure EFI boot entries
